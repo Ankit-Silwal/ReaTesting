@@ -5,6 +5,46 @@ use relay_core::{
 };
 use serde_json::{Value, json};
 use std::{sync::Arc, time::Duration};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpListener,
+};
+
+async fn raw_response(content_type: &str, payload: Vec<u8>) -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("http://{}", listener.local_addr().unwrap());
+    let headers = format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        payload.len()
+    );
+    tokio::spawn(async move {
+        let (mut stream, _) = listener.accept().await.unwrap();
+        let mut request = [0; 4096];
+        let _ = stream.read(&mut request).await;
+        if stream.write_all(headers.as_bytes()).await.is_ok() {
+            let _ = stream.write_all(&payload).await;
+        }
+    });
+    url
+}
+
+#[tokio::test]
+async fn bounds_large_response_capture_and_marks_truncation() {
+    let limit = relay_core::http::MAX_RESPONSE_BYTES;
+    let url = raw_response("text/plain", vec![b'x'; limit + 1024]).await;
+    let response = HttpEngine::default().send(request(url)).await.unwrap();
+    assert!(response.truncated);
+    assert_eq!(response.size, limit);
+    assert_eq!(response.body.len(), limit);
+}
+
+#[tokio::test]
+async fn renders_binary_as_hex_instead_of_control_characters() {
+    let url = raw_response("application/octet-stream", vec![0, 1, 2, 255]).await;
+    let response = HttpEngine::default().send(request(url)).await.unwrap();
+    assert!(response.binary);
+    assert_eq!(response.body, "00 01 02 ff ");
+}
 
 fn request(url: String) -> RequestSpec {
     RequestSpec {

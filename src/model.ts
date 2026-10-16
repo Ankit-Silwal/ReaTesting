@@ -172,14 +172,26 @@ export function prettyBody(body: string): string {
   }
 }
 
-export function toCurl(request: Request, environment?: Environment): string {
+export function toCurl(
+  request: Request,
+  environment?: Environment,
+  settings: Settings = defaults,
+): string {
   const r = resolveRequest(request, environment);
   const url = new URL(r.url);
   r.params
     .filter((p) => p.enabled && p.key)
     .forEach((p) => url.searchParams.append(p.key, p.value));
   const quote = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
-  const parts = ["curl", "-X", r.method, quote(url.toString())];
+  const parts = [
+    "curl",
+    ...(r.method === "HEAD" ? ["--head"] : ["-X", r.method]),
+    quote(url.toString()),
+    "--max-time",
+    String(settings.timeoutMs / 1000),
+  ];
+  if (settings.followRedirects) parts.push("--location", "--max-redirs", "10");
+  if (!settings.verifyTls) parts.push("--insecure");
   r.headers
     .filter((p) => p.enabled && p.key)
     .forEach((p) => parts.push("-H", quote(`${p.key}: ${p.value}`)));
@@ -208,6 +220,29 @@ function postmanPairs(value: unknown): Pair[] {
         return pair(string(v.key), string(v.value), !v.disabled);
       })
     : [];
+}
+
+export function importCollectionEnvironment(
+  input: unknown,
+): Environment | null {
+  const root = record(input);
+  if (!Array.isArray(root.variable) || !root.variable.length) return null;
+  return {
+    id: uid(),
+    name: `${string(record(root.info).name, "Imported collection")} variables`,
+    variables: root.variable.map((value) => {
+      const variable = record(value);
+      return pair(
+        string(variable.key),
+        typeof variable.value === "string"
+          ? variable.value
+          : variable.value == null
+            ? ""
+            : JSON.stringify(variable.value),
+        !variable.disabled,
+      );
+    }),
+  };
 }
 
 export function importCollections(input: unknown): Collection[] {

@@ -16,6 +16,7 @@ try {
       "No Relay WebView found. Start the native verification configuration first.",
     );
   const errors = [];
+  const collectionName = `Native verification ${Date.now()}`;
   page.on("pageerror", (error) => errors.push(error.message));
   await expect(
     page.getByRole("button", { name: "Send", exact: true }),
@@ -23,6 +24,7 @@ try {
   await page
     .getByRole("button", { name: "GET List users", exact: true })
     .click();
+  await page.getByLabel("Request URL").fill("{{base_url}}/users");
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByText("200 OK", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Response body")).toContainText('"total": 2');
@@ -36,6 +38,8 @@ try {
   await page
     .getByRole("button", { name: "POST Create a user", exact: true })
     .click();
+  await page.getByLabel("Request URL").fill("{{base_url}}/echo");
+  await page.getByRole("tab", { name: "Body", exact: true }).first().click();
   await page
     .getByLabel("Request body")
     .fill('{"name":"Rust native verification","number":42}');
@@ -67,7 +71,7 @@ try {
     .getByRole("button", { name: "New collection", exact: true })
     .first()
     .click();
-  await page.getByLabel("Collection name").fill("Native verification");
+  await page.getByLabel("Collection name").fill(collectionName);
   await page
     .getByRole("button", { name: "Create collection", exact: true })
     .click();
@@ -76,12 +80,12 @@ try {
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("button", { name: "Native verification 0", exact: true }),
+    page.getByRole("button", { name: `${collectionName} 0`, exact: true }),
   ).toBeVisible();
   const data = await page.evaluate(async () =>
     window.__TAURI_INTERNALS__.invoke("load_workspace"),
   );
-  if (!data.collections.some((c) => c.name === "Native verification"))
+  if (!data.collections.some((c) => c.name === collectionName))
     throw new Error("Native workspace did not persist.");
   if (errors.length) throw new Error(errors.join("\n"));
   await writeFile(

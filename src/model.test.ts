@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  defaults,
+  importCollectionEnvironment,
   exportCollection,
   importCollections,
   initialWorkspace,
@@ -60,6 +62,20 @@ describe("environment resolution", () => {
 });
 
 describe("Postman compatibility", () => {
+  it("imports collection variables into a separate environment", () => {
+    const environment = importCollectionEnvironment({
+      info: { name: "Payments" },
+      variable: [
+        { key: "base_url", value: "https://api.example.com" },
+        { key: "page", value: 2 },
+      ],
+    });
+    expect(environment?.name).toBe("Payments variables");
+    expect(interpolate("{{base_url}}/users?page={{page}}", environment!)).toBe(
+      "https://api.example.com/users?page=2",
+    );
+    expect(importCollectionEnvironment({ item: [] })).toBeNull();
+  });
   it("imports folders, inherited authentication and duplicated raw/query correctly", () => {
     const result = importCollections({
       info: { name: "API" },
@@ -141,6 +157,24 @@ it("generates cURL with escaped quotes and substituted parameters", () => {
   );
   expect(value).toContain("q=a+b");
   expect(value).toContain("O'\\''Reilly");
+});
+
+it("includes HEAD, redirect, TLS and timeout behavior in cURL snippets", () => {
+  const value = toCurl(
+    newRequest({ url: "https://example.com", method: "HEAD" }),
+    undefined,
+    { ...defaults, timeoutMs: 1500, verifyTls: false },
+  );
+  expect(value).toContain("--head");
+  expect(value).toContain("--max-time 1.5");
+  expect(value).toContain("--location");
+  expect(value).toContain("--insecure");
+});
+
+it("rejects malformed nested workspace entries before rendering", () => {
+  const value = initialWorkspace("http://localhost");
+  (value.environments[0] as unknown as { variables: unknown }).variables = [{}];
+  expect(() => validateWorkspace(value)).toThrow("preserved");
 });
 
 it("validates workspace versions and recovers a missing active tab", () => {

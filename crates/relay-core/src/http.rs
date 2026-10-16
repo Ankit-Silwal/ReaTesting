@@ -205,7 +205,7 @@ impl HttpEngine {
             }
             bytes.extend_from_slice(&chunk);
         }
-        let binary = !is_text && std::str::from_utf8(&bytes).is_err();
+        let binary = !is_text && (bytes.contains(&0) || std::str::from_utf8(&bytes).is_err());
         let body = if binary {
             bytes
                 .iter()

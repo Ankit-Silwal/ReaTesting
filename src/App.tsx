@@ -57,6 +57,7 @@ import {
   exportCollection,
   formatSize,
   importCollections,
+  importCollectionEnvironment,
   initialWorkspace,
   methods,
   newRequest,
@@ -461,9 +462,14 @@ function App() {
     try {
       const data = JSON.parse(importText);
       const parsed = importCollections(data);
+      const importedEnvironment = importCollectionEnvironment(data);
       setWorkspace((ws) => ({
         ...ws,
         collections: [...ws.collections, ...parsed],
+        environments: importedEnvironment
+          ? [...ws.environments, importedEnvironment]
+          : ws.environments,
+        activeEnvironmentId: importedEnvironment?.id ?? ws.activeEnvironmentId,
       }));
       closeDialog();
       setImportText("");
@@ -487,7 +493,7 @@ function App() {
   let code = "";
   if (dialog === "code") {
     try {
-      code = toCurl(request, environment);
+      code = toCurl(request, environment, workspace.settings);
     } catch (e) {
       code = e instanceof Error ? e.message : String(e);
     }

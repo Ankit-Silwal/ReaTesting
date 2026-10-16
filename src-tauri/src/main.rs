@@ -1,5 +1,5 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// Relay is a desktop GUI in both development and packaged builds.
+#![windows_subsystem = "windows"]
 
 fn main() {
     relay_lib::run()

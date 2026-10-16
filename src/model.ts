@@ -387,6 +387,44 @@ export function validateWorkspace(input: unknown): Workspace {
       "Workspace format is invalid. The saved file has been preserved.",
     );
   const ws = input as Workspace;
+  const validPairs = (value: unknown): value is Pair[] =>
+    Array.isArray(value) &&
+    value.every((p) => {
+      const row = record(p);
+      return (
+        typeof row.id === "string" &&
+        typeof row.key === "string" &&
+        typeof row.value === "string" &&
+        typeof row.enabled === "boolean"
+      );
+    });
+  if (
+    ws.collections.some(
+      (c) =>
+        !c ||
+        typeof c.id !== "string" ||
+        typeof c.name !== "string" ||
+        !Array.isArray(c.requests),
+    ) ||
+    ws.environments.some(
+      (e) =>
+        !e ||
+        typeof e.id !== "string" ||
+        typeof e.name !== "string" ||
+        !validPairs(e.variables),
+    ) ||
+    ws.history.some(
+      (h) =>
+        !h ||
+        typeof h.id !== "string" ||
+        typeof h.timestamp !== "number" ||
+        !h.request,
+    )
+  ) {
+    throw new Error(
+      "Saved workspace entries are invalid. The saved file has been preserved.",
+    );
+  }
   const requests = [
     ...ws.tabs,
     ...ws.collections.flatMap((c) =>
@@ -399,10 +437,16 @@ export function validateWorkspace(input: unknown): Workspace {
       !r ||
       typeof r.id !== "string" ||
       typeof r.url !== "string" ||
+      typeof r.name !== "string" ||
+      typeof r.body !== "string" ||
+      !["none", "json", "text"].includes(r.bodyMode) ||
       !methods.includes(r.method) ||
-      !Array.isArray(r.headers) ||
-      !Array.isArray(r.params) ||
+      !validPairs(r.headers) ||
+      !validPairs(r.params) ||
       !r.auth ||
+      typeof r.auth.token !== "string" ||
+      typeof r.auth.username !== "string" ||
+      typeof r.auth.password !== "string" ||
       !["none", "bearer", "basic"].includes(r.auth.kind)
     )
       throw new Error(

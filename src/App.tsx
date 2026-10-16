@@ -204,6 +204,36 @@ function App() {
     document.documentElement.dataset.theme = workspace.settings.theme;
   }, [workspace.settings.theme]);
 
+  useEffect(() => {
+    if (!ready || !isDesktop()) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    import("@tauri-apps/api/window")
+      .then(async ({ getCurrentWindow }) => {
+        if (disposed) return;
+        const nativeWindow = getCurrentWindow();
+        const stop = await nativeWindow.onCloseRequested(async (event) => {
+          event.preventDefault();
+          try {
+            await saveQueue.current;
+            await saveWorkspace(currentWorkspace.current);
+            await nativeWindow.destroy();
+          } catch (error) {
+            setPersistError(`Could not save before closing: ${String(error)}`);
+          }
+        });
+        if (disposed) stop();
+        else unlisten = stop;
+      })
+      .catch(() => {
+        /* Browser IPC mocks do not implement native window events. */
+      });
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [ready]);
+
   const request =
     workspace.tabs.find((t) => t.id === workspace.activeId) ??
     workspace.tabs[0];

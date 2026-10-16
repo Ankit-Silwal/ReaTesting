@@ -2,11 +2,13 @@
 
 A Postman-style desktop workspace for HTTP APIs. A Rust backend sends requests and stores your workspace; React and TypeScript provide the interface inside Tauri 2.
 
+![Relay desktop API workspace](docs/relay.png)
+
 ## Run on this computer
 
-Open PowerShell and run:
+Double-click `Start Relay.cmd` in this folder, or use the **Relay API Client** desktop shortcut. A bundled Windows development build is already available at `target/debug/relay.exe` on this computer. Its installer is `target/debug/bundle/nsis/Relay_0.1.0_x64-setup.exe`.
 
-After a bundled build is available, you can also double-click `Start Relay.cmd` in this folder.
+To run the source with live reloading, open PowerShell and run:
 
 ```powershell
 cd C:\Studies\Testing\ReaTesting
@@ -35,7 +37,7 @@ The built-in demo service binds only to `127.0.0.1` on an available port. Its `b
 - Rust execution with cancellation, timeouts, optional redirects, SSL verification, decompression, and a session cookie jar.
 - JSON highlighting, raw view, response search, headers, Set-Cookie inspection, timing, size, copy, and download.
 - Collections, saved requests, request history, dark/light themes, keyboard shortcuts.
-- Postman Collection v2/v2.1 import/export, including folders, disabled rows, raw bodies, and supported inherited auth.
+- Postman Collection v2/v2.1 import/export, including folders, disabled rows, raw bodies, and supported inherited auth. Imported collection variables create a separate selected environment.
 - Atomic workspace persistence. Response bodies are not stored in history.
 
 ## Build a Windows executable and installer
@@ -68,6 +70,10 @@ npm.cmd run test:e2e
 ```
 
 Rust integration tests use a real controlled loopback HTTP server. Browser tests use a mocked Tauri bridge to exercise editing, collections, import/export, cancellation UI, persistence, and shortcuts. They complement native application testing. Browser tests use installed Google Chrome.
+
+The Rust test command uses one compiler job to avoid concurrent Windows linker operations. This affects build scheduling, not test coverage or application request concurrency.
+
+To repeat the native checks, start Relay with `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223` and `RELAY_DATA_DIR` set to a disposable test directory, then run `npm.cmd run test:native`. Keep the debugging port restricted to local development. The script supports both the development WebView and the bundled executable.
 
 ## Data and practical limits
 

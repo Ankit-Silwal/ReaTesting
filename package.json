@@ -10,7 +10,7 @@
     "tauri": "tauri",
     "desktop": "node scripts/run.mjs desktop dev",
     "desktop:build": "node scripts/run.mjs desktop build",
-    "test:rust": "node scripts/run.mjs cargo test -p relay-core",
+    "test:rust": "node scripts/run.mjs cargo test -p relay-core --jobs 1",
     "check:rust": "node scripts/run.mjs cargo check --workspace",
     "test": "vitest run",
     "test:e2e": "playwright test",

@@ -6,6 +6,8 @@ A Postman-style desktop workspace for HTTP APIs. A Rust backend sends requests a
 
 Open PowerShell and run:
 
+After a bundled build is available, you can also double-click `Start Relay.cmd` in this folder.
+
 ```powershell
 cd C:\Studies\Testing\ReaTesting
 npm.cmd run desktop

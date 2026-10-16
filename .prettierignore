@@ -1,0 +1,8 @@
+node_modules
+target
+dist
+.verification
+test-results
+playwright-report
+src-tauri/gen
+src-tauri/icons

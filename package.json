@@ -13,7 +13,9 @@
     "test:rust": "node scripts/run.mjs cargo test -p relay-core",
     "check:rust": "node scripts/run.mjs cargo check --workspace",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:native": "node scripts/verify-native.mjs",
+    "format": "prettier --write src e2e scripts *.ts *.json README.md docs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

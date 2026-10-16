@@ -1,5 +1,8 @@
 use std::{collections::BTreeMap, sync::Arc};
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::{TcpListener, TcpStream}};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::{TcpListener, TcpStream},
+};
 use tokio_util::sync::CancellationToken;
 
 pub struct DemoServer {
@@ -9,8 +12,13 @@ pub struct DemoServer {
 
 impl DemoServer {
     pub async fn start() -> Result<Arc<Self>, String> {
-        let listener = TcpListener::bind("127.0.0.1:0").await.map_err(|e| e.to_string())?;
-        let url = format!("http://{}", listener.local_addr().map_err(|e| e.to_string())?);
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .map_err(|e| e.to_string())?;
+        let url = format!(
+            "http://{}",
+            listener.local_addr().map_err(|e| e.to_string())?
+        );
         let shutdown = CancellationToken::new();
         let stop = shutdown.clone();
         tokio::spawn(async move {
@@ -28,7 +36,11 @@ impl DemoServer {
     }
 }
 
-impl Drop for DemoServer { fn drop(&mut self) { self.shutdown.cancel(); } }
+impl Drop for DemoServer {
+    fn drop(&mut self) {
+        self.shutdown.cancel();
+    }
+}
 
 async fn serve(mut stream: TcpStream) {
     let _ = tokio::time::timeout(std::time::Duration::from_secs(10), async {

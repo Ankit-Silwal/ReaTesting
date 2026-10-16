@@ -1050,6 +1050,7 @@ function App() {
                         <input
                           type="password"
                           autoComplete="off"
+                          aria-label="Token"
                           placeholder="Token or {{access_token}}"
                           value={request.auth.token}
                           onChange={(e) =>
@@ -1472,6 +1473,7 @@ function App() {
           <label className="field">
             Collection
             <select
+              aria-label="Collection"
               value={selectedCollection}
               onChange={(e) => setSelectedCollection(e.target.value)}
             >

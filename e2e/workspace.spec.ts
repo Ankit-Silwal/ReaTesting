@@ -37,7 +37,7 @@ test("edits JSON and bearer authorization, rejects malformed JSON", async ({ pag
   await page.getByLabel("Request body").fill('{"name":"Ada"}');
   await page.getByRole("tab", { name: "Authorization" }).click();
   await page.getByLabel("Authorization type").selectOption("bearer");
-  await page.getByLabel("Token", { exact: true }).fill("my-token");
+  await page.getByRole("textbox", { name: /^Token/ }).fill("my-token");
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByLabel("Response body")).toContainText("Ada");
   const sent = await page.evaluate(() => (window as unknown as Record<string, unknown>).__lastRequest) as {auth:{token:string};method:string}; expect(sent.auth.token).toBe("my-token"); expect(sent.method).toBe("POST");
@@ -48,7 +48,7 @@ test("edits JSON and bearer authorization, rejects malformed JSON", async ({ pag
 });
 
 test("creates a collection, saves a request and restores it after reload", async ({ page }) => {
-  await page.getByRole("button", { name: "New collection", exact: true }).click();
+  await page.getByRole("button", { name: "New collection", exact: true }).first().click();
   await page.getByLabel("Collection name").fill("My API"); await page.getByRole("button", { name: "Create collection", exact: true }).click();
   await page.getByRole("button", { name: "New request", exact: true }).click();
   await page.getByLabel("Request URL").fill("https://example.com/api");

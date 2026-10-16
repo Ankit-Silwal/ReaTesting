@@ -40,7 +40,8 @@ async fn start_demo(state: State<'_, AppState>) -> Result<String, String> {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let path = app.path().app_data_dir()?.join("workspace.json");
+            let directory = std::env::var_os("RELAY_DATA_DIR").map(std::path::PathBuf::from).unwrap_or(app.path().app_data_dir()?);
+            let path = directory.join("workspace.json");
             app.manage(AppState { engine: HttpEngine::default(), storage: Arc::new(WorkspaceStore::new(path)), demo: tokio::sync::Mutex::new(None) });
             Ok(())
         })

@@ -12,6 +12,7 @@ target
 test-results
 playwright-report
 .verification
+/data/
 dist
 dist-ssr
 *.local

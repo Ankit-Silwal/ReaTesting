@@ -15,8 +15,9 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:native": "node scripts/verify-native.mjs",
-    "api": "node scripts/run.mjs cargo run -p relay-test-api",
+    "api": "node scripts/run.mjs cargo run -p relay-test-api --",
     "test:api": "node scripts/run.mjs cargo test -p relay-test-api --jobs 1",
+    "test:api:live": "node scripts/verify-test-api.mjs",
     "format": "prettier --write src e2e scripts *.ts *.json README.md docs"
   },
   "dependencies": {

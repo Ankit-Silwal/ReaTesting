@@ -1,0 +1,60 @@
+{
+  "info": {
+    "name": "Local test API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "List all items",
+      "request": { "method": "GET", "url": "{{base_url}}/test" }
+    },
+    {
+      "name": "Read an item",
+      "request": { "method": "GET", "url": "{{base_url}}/test/{{id}}" }
+    },
+    {
+      "name": "Create an item (auto ID)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/test",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"My test item\",\n  \"message\": \"Created from Relay\",\n  \"count\": 1\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      }
+    },
+    {
+      "name": "Replace an item",
+      "request": {
+        "method": "PUT",
+        "url": "{{base_url}}/test/{{id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Replaced item\",\n  \"count\": 2\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      }
+    },
+    {
+      "name": "Update an item's fields",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base_url}}/test/{{id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"count\": 3\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      }
+    },
+    {
+      "name": "Delete an item",
+      "request": { "method": "DELETE", "url": "{{base_url}}/test/{{id}}" }
+    }
+  ]
+}

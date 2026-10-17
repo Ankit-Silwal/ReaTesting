@@ -31,6 +31,8 @@ The built-in demo service binds only to `127.0.0.1` on an available port. Its `b
 
 ## Features
 
+For a separate file-backed CRUD API at `http://localhost:3000`, run `npm.cmd run api` or double-click **Start Test API.cmd**. See [testing API instructions](docs/test-api.md) and import `examples/local-test-api.postman_collection.json` into Relay for ready-made GET, POST, PUT, PATCH, and DELETE requests.
+
 - GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS over HTTP/HTTPS.
 - Multiple request tabs, query parameters and headers, raw JSON/text bodies.
 - Bearer tokens, HTTP Basic authentication, environment variables in request fields.
